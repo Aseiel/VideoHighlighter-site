@@ -1,0 +1,769 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>VideoHighlighter Pro — Offline video analysis, no subscription</title>
+<meta name="description" content="VideoHighlighter Pro finds the moments that matter in your footage — detection, tracking, and editing, run entirely offline. One-time purchase, no cloud upload.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg: #0F1316;
+    --panel: #161B1E;
+    --panel-2: #1C2226;
+    --line: #2A3136;
+    --text: #E7EBEC;
+    --text-dim: #8B9599;
+    --teal: #4FD8C4;
+    --teal-dim: #2E7A6E;
+    --amber: #FF9F4A;
+    --amber-dim: #8A5527;
+    --radius: 6px;
+  }
+
+  *{ margin:0; padding:0; box-sizing:border-box; }
+
+  html{ scroll-behavior: smooth; }
+
+  body{
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'IBM Plex Sans', sans-serif;
+    line-height: 1.55;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  ::selection{ background: var(--teal-dim); color: var(--text); }
+
+  h1, h2, h3{
+    font-family: 'Space Grotesk', sans-serif;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+  }
+
+  .mono{
+    font-family: 'IBM Plex Mono', monospace;
+  }
+
+  a{ color: inherit; text-decoration: none; }
+
+  .wrap{
+    max-width: 1120px;
+    margin: 0 auto;
+    padding: 0 28px;
+  }
+
+  /* ---------- Top bar ---------- */
+
+  .topbar{
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    background: rgba(15,19,22,0.85);
+    backdrop-filter: blur(8px);
+    border-bottom: 1px solid var(--line);
+  }
+
+  .topbar .wrap{
+    display:flex;
+    align-items:center;
+    justify-content: space-between;
+    height: 64px;
+  }
+
+  .brand{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    font-family:'Space Grotesk', sans-serif;
+    font-weight:600;
+    font-size: 17px;
+  }
+
+  .brand .dot{
+    width:9px; height:9px; border-radius:50%;
+    background: var(--teal);
+    box-shadow: 0 0 10px var(--teal);
+    flex-shrink:0;
+  }
+
+  .navlinks{
+    display:flex;
+    gap: 28px;
+    font-size: 14px;
+    color: var(--text-dim);
+  }
+
+  .navlinks a:hover{ color: var(--text); }
+
+  .nav-cta{
+    padding: 8px 16px;
+    border: 1px solid var(--teal-dim);
+    border-radius: var(--radius);
+    color: var(--teal);
+    font-size: 13px;
+    font-family:'IBM Plex Mono', monospace;
+    transition: all .15s ease;
+  }
+  .nav-cta:hover{ background: rgba(79,216,196,0.08); border-color: var(--teal); }
+
+  @media (max-width: 720px){
+    .navlinks{ display:none; }
+  }
+
+  /* ---------- Timecode rail ---------- */
+
+  .tc-label{
+    font-family:'IBM Plex Mono', monospace;
+    font-size: 12px;
+    color: var(--text-dim);
+    letter-spacing: 0.08em;
+    display:flex;
+    align-items:center;
+    gap: 10px;
+    margin-bottom: 22px;
+  }
+  .tc-label::before{
+    content:"";
+    width: 22px; height:1px;
+    background: var(--teal-dim);
+  }
+
+  /* ---------- Hero ---------- */
+
+  .hero{
+    padding: 88px 0 64px;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .hero-grid{
+    display:grid;
+    grid-template-columns: 1.05fr 0.95fr;
+    gap: 56px;
+    align-items:center;
+  }
+
+  @media (max-width: 900px){
+    .hero-grid{ grid-template-columns: 1fr; }
+  }
+
+  .hero h1{
+    font-size: clamp(34px, 4.6vw, 54px);
+    line-height: 1.08;
+    margin-bottom: 22px;
+  }
+
+  .hero h1 .accent{ color: var(--teal); }
+
+  .hero p.lede{
+    font-size: 17px;
+    color: var(--text-dim);
+    max-width: 46ch;
+    margin-bottom: 34px;
+  }
+
+  .cta-row{
+    display:flex;
+    gap: 14px;
+    flex-wrap: wrap;
+  }
+
+  .btn{
+    display:inline-flex;
+    align-items:center;
+    gap: 8px;
+    padding: 13px 22px;
+    border-radius: var(--radius);
+    font-size: 14.5px;
+    font-weight: 500;
+    font-family: 'IBM Plex Sans', sans-serif;
+    transition: all .15s ease;
+    border: 1px solid transparent;
+  }
+
+  .btn-primary{
+    background: var(--amber);
+    color: #1a1206;
+  }
+  .btn-primary:hover{ background: #ffb164; }
+
+  .btn-ghost{
+    border-color: var(--line);
+    color: var(--text);
+  }
+  .btn-ghost:hover{ border-color: var(--text-dim); }
+
+  /* ---------- Product frame (signature element) ---------- */
+
+  .scope{
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 22px 22px 18px;
+  }
+
+  .scope-head{
+    display:flex;
+    justify-content: space-between;
+    align-items:center;
+    font-family:'IBM Plex Mono', monospace;
+    font-size: 11px;
+    color: var(--text-dim);
+    margin-bottom: 16px;
+  }
+
+  .scope-head .rec{
+    display:flex; align-items:center; gap:6px;
+    color: var(--amber);
+  }
+  .scope-head .rec .dot{
+    width:6px;height:6px;border-radius:50%;
+    background: var(--amber);
+    animation: pulse 1.6s ease-in-out infinite;
+  }
+
+  @keyframes pulse{
+    0%,100%{ opacity: 1; }
+    50%{ opacity: 0.25; }
+  }
+
+  .shot{
+    position: relative;
+    background: var(--panel-2);
+    border-radius: 4px;
+    overflow: hidden;
+  }
+
+  /*
+    TODO (best version): replace the <img> below with a 20–30s muted
+    screen recording of the actual pipeline running, e.g.:
+
+    <video autoplay loop muted playsinline poster="assets/timeline-poster.png">
+      <source src="assets/pipeline-demo.webm" type="video/webm">
+    </video>
+
+    Keep it under ~5 MB and the playhead overlay still works on top of it.
+  */
+  .shot img,
+  .shot video{
+    display:block;
+    width:100%;
+    height:auto;
+  }
+
+  .scope-caption{
+    display:flex;
+    justify-content: space-between;
+    gap: 18px;
+    font-family:'IBM Plex Mono', monospace;
+    font-size: 11px;
+    color: var(--text-dim);
+    margin-top: 14px;
+    flex-wrap: wrap;
+  }
+
+  /* ---------- Section shared ---------- */
+
+  section{
+    padding: 72px 0;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .section-head{
+    max-width: 60ch;
+    margin-bottom: 44px;
+  }
+
+  .section-head h2{
+    font-size: clamp(26px, 3vw, 34px);
+    margin-bottom: 14px;
+  }
+
+  .section-head p{
+    color: var(--text-dim);
+    font-size: 16px;
+  }
+
+  /* ---------- Positioning strip ---------- */
+
+  .positioning{
+    display:grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1px;
+    background: var(--line);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    overflow: hidden;
+  }
+
+  @media (max-width: 800px){
+    .positioning{ grid-template-columns: 1fr; }
+  }
+
+  .pos-item{
+    background: var(--panel);
+    padding: 28px 26px;
+  }
+
+  .pos-item .k{
+    font-family:'IBM Plex Mono', monospace;
+    font-size: 12px;
+    color: var(--amber);
+    margin-bottom: 10px;
+    display:block;
+  }
+
+  .pos-item h3{
+    font-size: 18px;
+    margin-bottom: 8px;
+  }
+
+  .pos-item p{
+    color: var(--text-dim);
+    font-size: 14.5px;
+  }
+
+  /* ---------- Pipeline (features) ---------- */
+
+  .pipeline{
+    display:flex;
+    flex-direction: column;
+  }
+
+  .stage{
+    display:grid;
+    grid-template-columns: 120px 1fr;
+    gap: 28px;
+    padding: 26px 0;
+    border-top: 1px solid var(--line);
+  }
+
+  .stage:last-child{ border-bottom: 1px solid var(--line); }
+
+  @media (max-width: 700px){
+    .stage{ grid-template-columns: 1fr; gap: 8px; }
+  }
+
+  .stage .tag{
+    font-family:'IBM Plex Mono', monospace;
+    font-size: 12px;
+    color: var(--teal);
+    align-self: start;
+    padding-top: 3px;
+  }
+
+  .stage .body h3{
+    font-size: 19px;
+    margin-bottom: 8px;
+    display:flex;
+    align-items:center;
+    gap: 10px;
+  }
+
+  .stage .body h3 .num{
+    color: var(--text-dim);
+    font-family:'IBM Plex Mono', monospace;
+    font-size: 13px;
+    font-weight: 400;
+  }
+
+  .stage .body p{
+    color: var(--text-dim);
+    font-size: 15px;
+    max-width: 62ch;
+  }
+
+  /* ---------- Proof ---------- */
+
+  .proof-grid{
+    display:grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 32px;
+  }
+
+  @media (max-width: 800px){
+    .proof-grid{ grid-template-columns: 1fr; }
+  }
+
+  .proof-item .num{
+    font-family:'Space Grotesk', sans-serif;
+    font-size: 42px;
+    font-weight: 600;
+    color: var(--teal);
+    line-height: 1;
+    margin-bottom: 10px;
+  }
+
+  .proof-item .label{
+    color: var(--text-dim);
+    font-size: 14.5px;
+  }
+
+  /* ---------- Pricing ---------- */
+
+  .pricing-grid{
+    display:grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 22px;
+  }
+
+  @media (max-width: 800px){
+    .pricing-grid{ grid-template-columns: 1fr; }
+  }
+
+  .plan{
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 32px 30px;
+    display:flex;
+    flex-direction: column;
+  }
+
+  .plan.featured{
+    border-color: var(--teal-dim);
+    position: relative;
+  }
+
+  .plan.featured::before{
+    content: "INTRO PRICING";
+    position:absolute;
+    top: -11px;
+    left: 30px;
+    background: var(--bg);
+    padding: 0 8px;
+    font-family:'IBM Plex Mono', monospace;
+    font-size: 10.5px;
+    letter-spacing: 0.08em;
+    color: var(--teal);
+  }
+
+  .plan h3{
+    font-size: 18px;
+    color: var(--text-dim);
+    font-weight: 500;
+    margin-bottom: 6px;
+  }
+
+  .plan .price{
+    font-family:'Space Grotesk', sans-serif;
+    font-size: 40px;
+    font-weight: 600;
+    margin-bottom: 4px;
+  }
+
+  .plan .price .cadence{
+    font-family:'IBM Plex Sans', sans-serif;
+    font-size: 14px;
+    color: var(--text-dim);
+    font-weight: 400;
+  }
+
+  .plan .sub{
+    color: var(--text-dim);
+    font-size: 13.5px;
+    margin-bottom: 24px;
+  }
+
+  .plan ul{
+    list-style: none;
+    margin-bottom: 28px;
+    flex-grow: 1;
+  }
+
+  .plan li{
+    font-size: 14.5px;
+    color: var(--text);
+    padding: 8px 0;
+    border-top: 1px solid var(--line);
+    display:flex;
+    gap: 10px;
+  }
+
+  .plan li:first-child{ border-top: none; }
+
+  .plan li::before{
+    content: "—";
+    color: var(--teal);
+    flex-shrink:0;
+  }
+
+  /* ---------- Final CTA ---------- */
+
+  .final-cta{
+    text-align:center;
+    padding: 96px 0;
+  }
+
+  .final-cta h2{
+    font-size: clamp(28px, 4vw, 40px);
+    margin-bottom: 16px;
+  }
+
+  .final-cta p{
+    color: var(--text-dim);
+    margin-bottom: 32px;
+  }
+
+  .final-cta p a{
+    color: var(--teal);
+    border-bottom: 1px solid var(--teal-dim);
+  }
+
+  .final-cta .cta-row{
+    justify-content: center;
+  }
+
+  /* ---------- Footer ---------- */
+
+  footer{
+    padding: 40px 0;
+  }
+
+  footer .wrap{
+    display:flex;
+    justify-content: space-between;
+    align-items:center;
+    flex-wrap: wrap;
+    gap: 16px;
+    font-size: 13px;
+    color: var(--text-dim);
+  }
+
+  footer .flinks{
+    display:flex;
+    gap: 22px;
+  }
+
+  footer .flinks a:hover{ color: var(--text); }
+
+  @media (prefers-reduced-motion: reduce){
+    .scope-head .rec .dot{ animation: none !important; }
+  }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="wrap">
+    <div class="brand"><span class="dot"></span>VideoHighlighter <span style="color:var(--text-dim); font-weight:400;">Pro</span></div>
+    <div class="navlinks">
+      <a href="#pipeline">Pipeline</a>
+      <a href="#proof">Your control</a>
+      <a href="#pricing">Pricing</a>
+      <a href="https://github.com/Aseiel/VideoHighlighter">Free version</a>
+      <a href="https://discord.gg/cUPJqPAMmm">Discord</a>
+    </div>
+    <a href="#pricing" class="nav-cta">Get a license →</a>
+  </div>
+</div>
+
+<section class="hero">
+  <div class="wrap">
+    <div class="hero-grid">
+      <div>
+        <div class="tc-label">00:00:00:00 — INTRO</div>
+        <h1>Your footage never<br>leaves your machine.</h1>
+        <p class="lede">VideoHighlighter Pro finds the moments that matter — detection, tracking, and editing, running entirely offline on your own hardware. No upload. No subscription. No one else watching your footage.</p>
+        <div class="cta-row">
+          <a href="#pricing" class="btn btn-primary">Get a license — $49</a>
+          <a href="https://github.com/Aseiel/VideoHighlighter" class="btn btn-ghost">Free version on GitHub</a>
+        </div>
+      </div>
+
+      <div class="scope">
+        <div class="scope-head">
+          <span>VISUAL_SEARCH.QRY</span>
+          <span class="rec"><span class="dot"></span>LIVE ANALYSIS</span>
+        </div>
+        <div class="shot">
+          <!-- Swap this <img> for a short muted screen recording (<video>) when you have one — see the TODO in the CSS above. -->
+          <img src="assets/VisualSearch.webp" alt="VideoHighlighter visual search finding moments in footage from a text description" loading="eager">
+        </div>
+        <div class="scope-caption">
+          <span>visual search — actual product, not a mockup</span>
+          <span>v0.6.6</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="positioning">
+  <div class="wrap">
+    <div class="tc-label">00:01:12:00 — WHY OFFLINE</div>
+    <div class="section-head">
+      <h2>Cloud-based tools need a subscription because inference isn't free. Yours isn't running in the cloud.</h2>
+      <p>Most AI highlight and auto-edit tools charge monthly because they're paying for server-side GPU time on your footage. VideoHighlighter Pro runs the entire pipeline — detection, transcription, composition — on your own machine.</p>
+    </div>
+    <div class="positioning">
+      <div class="pos-item">
+        <span class="k">01</span>
+        <h3>Buy once, own it</h3>
+        <p>A single license, not a monthly charge. The tool keeps working whether or not you renew anything.</p>
+      </div>
+      <div class="pos-item">
+        <span class="k">02</span>
+        <h3>Nothing leaves your disk</h3>
+        <p>No upload step. Client footage, unreleased cuts, and anything under NDA never touch a server you don't control.</p>
+      </div>
+      <div class="pos-item">
+        <span class="k">03</span>
+        <h3>Runs on real hardware</h3>
+        <p>OpenVINO acceleration on Intel Arc, or any modern GPU. No render farm required.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="pipeline">
+  <div class="wrap">
+    <div class="tc-label">00:03:40:00 — PIPELINE</div>
+    <div class="section-head">
+      <h2>One pipeline, six stages, zero uploads</h2>
+      <p>Each stage runs locally, in order, on the footage you point it at.</p>
+    </div>
+    <div class="pipeline">
+      <div class="stage">
+        <div class="tag">DETECT</div>
+        <div class="body">
+          <h3><span class="num">01</span>Object &amp; motion detection</h3>
+          <p>YOLO-based object detection combined with optical flow finds people, movement, and action across every frame — the raw signal everything downstream is built on.</p>
+        </div>
+      </div>
+      <div class="stage">
+        <div class="tag">IDENTIFY</div>
+        <div class="body">
+          <h3><span class="num">02</span>Face recognition &amp; de-identification</h3>
+          <p>InsightFace tracks identity across a cut so the same person stays tagged scene to scene — and can be automatically blurred for privacy when that's what the footage needs.</p>
+        </div>
+      </div>
+      <div class="stage">
+        <div class="tag">TRANSCRIBE</div>
+        <div class="body">
+          <h3><span class="num">03</span>Speech transcription</h3>
+          <p>Whisper transcribes dialogue and narration locally, giving you a searchable, timestamped script tied directly to the timeline.</p>
+        </div>
+      </div>
+      <div class="stage">
+        <div class="tag">COMPOSE</div>
+        <div class="body">
+          <h3><span class="num">04</span>Composition Engine</h3>
+          <p>Reads spatial relationships between detected subjects to flag actual events — not just motion, but who's doing what, where, relative to whom.</p>
+        </div>
+      </div>
+      <div class="stage">
+        <div class="tag">SEARCH</div>
+        <div class="body">
+          <h3><span class="num">05</span>Semantic search</h3>
+          <p>CLIP-based search lets you find a moment by describing it — "the handshake," "the empty stage" — instead of scrubbing the whole timeline by eye.</p>
+        </div>
+      </div>
+      <div class="stage">
+        <div class="tag">EDIT</div>
+        <div class="body">
+          <h3><span class="num">06</span>Signal &amp; edit timelines</h3>
+          <p>A PySide6 editor separates the raw detection signal from your final cut, so you can review what the pipeline found before deciding what makes the edit.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="proof">
+  <div class="wrap">
+    <div class="tc-label">00:07:20:00 — IN USE</div>
+    <div class="section-head">
+      <h2>You decide what counts as a highlight</h2>
+      <p>This isn't an auto-editor that hands you a finished cut and hopes for the best. The pipeline surfaces everything it finds as reviewable signals — you choose what it looks for, review what it flagged, and keep full control of the final edit. And every build ships as a free, open-source release on GitHub first.</p>
+    </div>
+    <div class="proof-grid">
+      <div class="proof-item">
+        <div class="num">36</div>
+        <div class="label">Releases shipped since the first public build</div>
+      </div>
+      <!--
+        Downloads stat — enable once you've verified the real total:
+        curl -s "https://api.github.com/repos/Aseiel/VideoHighlighter/releases?per_page=100" | jq '[.[].assets[].download_count] | add'
+        Only worth showing if it's four digits.
+
+      <div class="proof-item">
+        <div class="num">X,XXX</div>
+        <div class="label">Downloads of the free version</div>
+      </div>
+      -->
+      <div class="proof-item">
+        <div class="num">0</div>
+        <div class="label">Uploads required to analyze your footage</div>
+      </div>
+      <div class="proof-item">
+        <div class="num">2</div>
+        <div class="label">Developers — the people who built it answer your support questions</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="pricing">
+  <div class="wrap">
+    <div class="tc-label">00:08:50:00 — PRICING</div>
+    <div class="section-head">
+      <h2>One license. No renewal.</h2>
+      <p>Offline, RSA-signed license keys — activate once, use indefinitely.</p>
+    </div>
+    <div class="pricing-grid">
+      <div class="plan featured">
+        <h3>Individual</h3>
+        <div class="price">$49 <span class="cadence">one-time</span></div>
+        <div class="sub">For a single editor, on your own machine</div>
+        <ul>
+          <li>Full pipeline: detect, identify, transcribe, compose, search</li>
+          <li>Offline license, one activation</li>
+          <li>Face de-identification tools included</li>
+          <li>Free updates within the license</li>
+        </ul>
+        <a href="#" class="btn btn-primary">Get a license</a>
+      </div>
+      <div class="plan">
+        <h3>Studio</h3>
+        <div class="price">Contact us</div>
+        <div class="sub">For teams and multi-seat studio deployments</div>
+        <ul>
+          <li>Everything in Individual</li>
+          <li>Multiple seats under one agreement</li>
+          <li>Priority support</li>
+          <li>Volume pricing</li>
+        </ul>
+        <a href="#" class="btn btn-ghost">Get in touch</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="final-cta">
+  <div class="wrap">
+    <div class="tc-label" style="justify-content:center;">00:10:30:00 — OUTRO</div>
+    <h2>Analyze the next cut without sending it anywhere.</h2>
+    <p><a href="https://github.com/Aseiel/VideoHighlighter">Free and open-source at the core.</a> Pro adds the license, the polish, and support.</p>
+    <div class="cta-row">
+      <a href="#pricing" class="btn btn-primary">Get a license — $49</a>
+      <a href="https://discord.gg/cUPJqPAMmm" class="btn btn-ghost">Join the Discord</a>
+    </div>
+  </div>
+</div>
+
+<footer>
+  <div class="wrap">
+    <div>© 2026 VideoHighlighter Pro</div>
+    <div class="flinks">
+      <a href="https://github.com/Aseiel/VideoHighlighter">Free version (GitHub)</a>
+      <a href="https://discord.gg/cUPJqPAMmm">Discord</a>
+      <a href="#pricing">Pricing</a>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>
