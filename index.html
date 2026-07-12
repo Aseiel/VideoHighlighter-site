@@ -714,6 +714,55 @@
   </div>
 </section>
 
+<section id="compare">
+  <style>
+    .compare-wrap{ overflow-x:auto; border:1px solid var(--line); border-radius:10px; }
+    .compare{ width:100%; border-collapse:collapse; font-size:14.5px; min-width:440px; }
+    .compare th, .compare td{ text-align:left; padding:14px 18px; border-top:1px solid var(--line); }
+    .compare thead th{ border-top:none; font-family:'Space Grotesk', sans-serif; font-size:12.5px; text-transform:uppercase; letter-spacing:0.05em; color:var(--text-dim); }
+    .compare td:nth-child(2), .compare th:nth-child(2),
+    .compare td:nth-child(3), .compare th:nth-child(3){ text-align:center; width:120px; }
+    .compare td:nth-child(3), .compare th:nth-child(3){ background: rgba(79,216,196,0.07); }
+    .compare thead th:nth-child(3){ color:var(--teal); }
+    .compare .y{ color:var(--teal); font-weight:700; }
+    .compare .n{ color:var(--text-dim); }
+    .compare .pro-row td:first-child{ font-weight:600; }
+    .compare tfoot td{ font-weight:600; border-top:2px solid var(--line); }
+    .compare-note{ margin-top:14px; font-size:13px; color:var(--text-dim); }
+  </style>
+  <div class="wrap">
+    <div class="tc-label">00:08:30:00 — FREE VS PRO</div>
+    <div class="section-head">
+      <h2>Free or Pro?</h2>
+      <p>The full analysis pipeline is free and open-source. Pro adds two exclusive tools, a commercial license, and priority support.</p>
+    </div>
+    <div class="compare-wrap">
+      <table class="compare">
+        <thead>
+          <tr><th>Feature</th><th>Free</th><th>Pro</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Scene, motion &amp; audio detection</td><td class="y">✓</td><td class="y">✓</td></tr>
+          <tr><td>Object detection &amp; action recognition</td><td class="y">✓</td><td class="y">✓</td></tr>
+          <tr><td>Transcription &amp; subtitles (Whisper)</td><td class="y">✓</td><td class="y">✓</td></tr>
+          <tr><td>Natural-language visual search</td><td class="y">✓</td><td class="y">✓</td></tr>
+          <tr><td>Face recognition &amp; de-identification</td><td class="y">✓</td><td class="y">✓</td></tr>
+          <tr><td>VR side-by-side mode</td><td class="y">✓</td><td class="y">✓</td></tr>
+          <tr><td>Fully offline · prebuilt app</td><td class="y">✓</td><td class="y">✓</td></tr>
+          <tr class="pro-row"><td>Counter / scoreboard detection</td><td class="n">—</td><td class="y">✓</td></tr>
+          <tr class="pro-row"><td>VR-optimized HEVC rendering</td><td class="n">—</td><td class="y">✓</td></tr>
+          <tr class="pro-row"><td>Commercial license (no AGPL)</td><td class="n">—</td><td class="y">✓</td></tr>
+          <tr class="pro-row"><td>Priority support &amp; updates</td><td class="n">—</td><td class="y">✓</td></tr>
+        </tbody>
+        <tfoot>
+          <tr><td>Price</td><td>Free · AGPL</td><td>$49 · one-time</td></tr>
+        </tfoot>
+      </table>
+    </div>
+    <p class="compare-note">The free edition is <a href="https://github.com/Aseiel/VideoHighlighter" style="color:var(--teal)">open-source on GitHub</a>. Pro is a proprietary build for commercial use.</p>
+  </div>
+</section>
+
 <section id="pricing">
   <div class="wrap">
     <div class="tc-label">00:08:50:00 — PRICING</div>
